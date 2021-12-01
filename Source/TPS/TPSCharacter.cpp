@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "TPSCharacter.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
@@ -32,8 +30,8 @@ ATPSCharacter::ATPSCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	GunComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Gun"));
-	GunComponent->SetupAttachment(GetMesh(), "GunSocket");
+	WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Gun"));
+	WeaponComponent->SetupAttachment(GetMesh(), "GunSocket");
 
 	MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle"));
 	MuzzleLocation->SetupAttachment(GetMesh());
@@ -47,7 +45,7 @@ void ATPSCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("WalkOrRun", IE_Released, this, &ATPSCharacter::WalkOrRun);
 	PlayerInputComponent->BindAction("UseCtrlRotYaw", IE_Pressed, this, &ATPSCharacter::UseCtrlRotYaw);
-	PlayerInputComponent->BindAction("Pick", IE_Pressed, this, &ATPSCharacter::Pick);
+	PlayerInputComponent->BindAction("SwitchWeapon", IE_Pressed, this, &ATPSCharacter::SwitchWeapon);
 	PlayerInputComponent->BindAction("MouseLeft", IE_Pressed, this, &ATPSCharacter::MouseLeftPressed);
 	PlayerInputComponent->BindAxis("MoveForward", this, &ATPSCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ATPSCharacter::MoveRight);
@@ -160,26 +158,40 @@ void ATPSCharacter::Tick(float DeltaTime)
 }
 
 
-void ATPSCharacter::HoldGun(UClass* p) 
+void ATPSCharacter::HoldWeapon(UClass* p) //传入武器类：在世界中生成类的对象，并将WeaponComponent变成类指定的样子
 {
-	Gun = (AGun*)(GetWorld()->SpawnActor(p));
-	Gun->Owner = this;
-	GunComponent->SetSkeletalMesh(Gun->Mesh);
+	Weapon = (AWeapon*)(GetWorld()->SpawnActor(p));
+	Weapon->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepRelativeTransform,"GunSocket");
+	Weapon->Owner = this;
+	WeaponComponent->SetSkeletalMesh(Weapon->Mesh);
 }
 
 
 
-void ATPSCharacter::Pick() 
+void ATPSCharacter::Pick(UClass* p)
 {
-	HoldGun(AGun_Colorful::StaticClass());
+	if(p!=nullptr)
+		Bag.Add(p);
+	else
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Pick(nullptr)")));
 }
-	
+
+void ATPSCharacter::SwitchWeapon() 
+{
+	int BagNum = Bag.Num();
+	if (BagNum == 0) { return; }
+
+	if(IndexOfWeapon >= BagNum){
+		IndexOfWeapon -= BagNum;
+	}
+	HoldWeapon(Bag[IndexOfWeapon++]);
+}
 
 void ATPSCharacter::MouseLeftPressed()
 {
-	if (Gun != nullptr)
+	if (Weapon != nullptr)
 	{
-		Gun->Fire();
+		Weapon->Fire();
 	}
 }
 

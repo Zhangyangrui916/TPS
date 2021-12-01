@@ -19,6 +19,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "OwningCharacter")
 		ATPSCharacter* OwningCharacter;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "OwningCharacter")
+		bool bIsFalling =false;
+
 	virtual void NativeInitializeAnimation() override;
 
 	virtual void NativeUpdateAnimation(float DeltaTimeX) override;

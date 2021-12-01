@@ -1,16 +1,18 @@
-
 #pragma once
-
 #include "CoreMinimal.h"
-#include "Gun.h"
+#include "Weapon.h"
 #include "GameFramework/Character.h"
 #include "TPSCharacter.generated.h"
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMyTESTSignature, float, nHealth);
 UCLASS(config = Game)
 class ATPSCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	UPROPERTY(BlueprintAssignable)
+		FMyTESTSignature OnHurtDelegate;
 
 public:
 	ATPSCharacter();
@@ -22,7 +24,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = Gun)
 		USceneComponent* MuzzleLocation; //枪口位置,对于所有武器，统一枪口相对于人的位置。
 	UPROPERTY(EditAnywhere, Category = Mesh)
-		USkeletalMeshComponent* GunComponent;	//给它set不同的mesh，让它变成不同外表的枪
+		USkeletalMeshComponent* WeaponComponent;	//给它set不同的mesh，让它变成不同外表的武器
 	UPROPERTY(EditAnywhere, Category = Camera)
 		float BaseTurnRate = 45.f;
 	UPROPERTY(EditAnywhere, Category = Camera)
@@ -31,10 +33,13 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, Category = Camera)
-		AGun* Gun;
+		AWeapon* Weapon;
 
-	void HoldGun(UClass* p);
+	TArray<UClass*> Bag;	//背包中的物品类。对于可以拥有多个的物品，该类中应有“个数”成员。
+
+	void HoldWeapon(UClass* p);
 	void MouseLeftPressed();
+	void Pick(UClass* p);
 
 protected:
 
@@ -52,10 +57,10 @@ protected:
 	/** Handler for when a touch input begins./stops */
 	void TouchStarted(ETouchIndex::Type FingerIndex, FVector Location);
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
-	void Pick();
 	void WalkOrRun();
-
+	void SwitchWeapon();
 	void UseCtrlRotYaw();
+	uint8 IndexOfWeapon = 0;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;	// APawn interface
 
