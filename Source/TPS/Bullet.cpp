@@ -1,13 +1,15 @@
-#include "TPSCharacter.h"
 #include "Bullet.h"
-
-// Sets default values
+#include "TPSCharacter.h"
+#include "Zoombie.h"
+#include "Components/SphereComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 ABullet::ABullet()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
+	RootComponent = CollisionComp;
 	CollisionComp->InitSphereRadius(5.0f);
-	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
+	CollisionComp->BodyInstance.SetCollisionProfileName("Bullet");
 	CollisionComp->OnComponentHit.AddDynamic(this, &ABullet::OnHit);
 	InitialLifeSpan = 3.0f;
 	BulletMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
@@ -23,19 +25,12 @@ void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 {
 	if ((OtherActor != nullptr) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
 	{
-		OtherComp->AddImpulseAtLocation(GetVelocity(), GetActorLocation());
+		OtherComp->AddImpulseAtLocation(GetVelocity()*100, GetActorLocation());
 		Destroy();
-
-		ATPSCharacter* otherCharacter = dynamic_cast<ATPSCharacter*>(OtherActor);
+		AZoombie* otherCharacter = dynamic_cast<AZoombie*>(OtherActor);
 		if (otherCharacter)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("i hit a man!")));
 			otherCharacter->OnHurt(5);
 		}
-		else
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("i hit sth")));
-		}
-
 	}
 }

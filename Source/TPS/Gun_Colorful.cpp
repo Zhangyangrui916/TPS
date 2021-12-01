@@ -8,15 +8,14 @@ AGun_Colorful::AGun_Colorful()
 	nAmmo = nMaxAmmo;
 	nDamage = 25;
 	
-	
-	static ConstructorHelpers::FObjectFinder<UBlueprint> tmp(TEXT("Blueprint'/Game/Weapon/Bullet_BP.Bullet_BP'"));
-	if (tmp.Object)
-	{
-		BlueprintBullet = (UClass*)tmp.Object->GeneratedClass;
-	}
+	//
+	//static ConstructorHelpers::FObjectFinder<UBlueprint> tmp(TEXT("Blueprint'/Game/Weapon/Bullet_BP.Bullet_BP'"));
+	//if (tmp.Object)
+	//{
+	//	BlueprintBullet = (UClass*)tmp.Object->GeneratedClass;
+	//}
+
 }
-
-
 
 void AGun_Colorful::Fire()
 {	

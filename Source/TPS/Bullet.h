@@ -1,11 +1,11 @@
 #pragma once
-#include "GameFramework/ProjectileMovementComponent.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Components/SphereComponent.h"
 #include "Bullet.generated.h"
 
-
+class USphereComponent;
+class UProjectileMovementComponent;
 UCLASS()
 class TPS_API ABullet : public AActor  //子弹指的是在空中飞行的具有实体的子弹，注意与Ammo相区分
 {
